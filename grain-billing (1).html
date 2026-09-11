@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anaaj Khata — Grain Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EC;
+    --paper-line:#E4DBC4;
+    --ink:#2B2620;
+    --ink-soft:#6B6152;
+    --gold:#B8860B;
+    --gold-deep:#8C6A0A;
+    --brown:#4A3728;
+    --green:#2F4F3E;
+    --green-soft:#3F6552;
+    --red:#A3402C;
+    --card:#FFFFFF;
+    --shadow: 0 1px 0 rgba(43,38,32,0.06);
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{ font-family:'Fraunces', serif; }
+  .app{ display:flex; min-height:100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:210px;
+    flex-shrink:0;
+    background:var(--brown);
+    color:#EFE6D6;
+    padding:22px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+  }
+  .brand{ display:flex; flex-direction:column; gap:2px; }
+  .brand-mark{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:0.2px;
+    color:#F4E7C8;
+  }
+  .brand-sub{ font-size:11px; color:#C7B79A; }
+  nav{ display:flex; flex-direction:column; gap:4px; }
+  .nav-btn{
+    text-align:left;
+    background:none;
+    border:none;
+    color:#DCCFB3;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:9px 10px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-btn:hover{ background:rgba(255,255,255,0.06); color:#F4E7C8; }
+  .nav-btn.active{ background:#F4E7C8; color:var(--brown); font-weight:600; }
+  .nav-dot{ width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.55; flex-shrink:0; }
+  .sidebar-foot{ margin-top:auto; font-size:11px; color:#9C8A6C; line-height:1.5; }
+
+  /* ---------- Main ---------- */
+  main{ flex:1; padding:30px 34px 60px; max-width:1100px; }
+  .page-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:10px; }
+  .page-head h1{ font-size:24px; font-weight:600; margin:0; color:var(--brown); }
+  .page-head .muted{ color:var(--ink-soft); font-size:13px; }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    box-shadow:var(--shadow);
+    padding:20px 22px;
+  }
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  .field{ display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+  .field label{ font-size:11.5px; color:var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
+  input, select{
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:8px 10px;
+    border:1px solid #D8CFB8;
+    border-radius:4px;
+    background:#FFFDF8;
+    color:var(--ink);
+  }
+  input:focus, select:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(184,134,11,0.12); }
+
+  button{ font-family:'Inter',sans-serif; cursor:pointer; }
+  .btn{
+    border:1px solid var(--brown);
+    background:var(--brown);
+    color:#F4E7C8;
+    padding:9px 16px;
+    border-radius:4px;
+    font-size:13.5px;
+    font-weight:600;
+  }
+  .btn:hover{ background:#3A2B1F; }
+  .btn.secondary{ background:#FFFDF8; color:var(--brown); border:1px solid #D8CFB8; }
+  .btn.secondary:hover{ background:#F3ECDB; }
+  .btn.danger{ background:#FFFDF8; color:var(--red); border:1px solid #E3C4BA; }
+  .btn.danger:hover{ background:#FBEDEA; }
+  .btn.small{ padding:5px 10px; font-size:12px; }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  /* ---------- Bill items table ---------- */
+  table{ width:100%; border-collapse:collapse; }
+  .items-table th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--ink-soft); font-weight:600; padding:8px 8px; border-bottom:2px solid var(--brown);
+  }
+  .items-table td{ padding:7px 8px; border-bottom:1px solid var(--paper-line); vertical-align:middle; }
+  .items-table input, .items-table select{ width:100%; padding:6px 8px; font-size:13.5px; }
+  .num{ font-variant-numeric:tabular-nums; text-align:right; }
+  .amt-cell{ font-variant-numeric:tabular-nums; text-align:right; font-weight:600; white-space:nowrap; }
+  .row-x{ background:none; border:none; color:var(--red); font-size:16px; padding:2px 6px; }
+  .row-x:hover{ opacity:.7; }
+
+  .summary{ display:flex; justify-content:flex-end; margin-top:16px; }
+  .summary-box{ width:300px; }
+  .summary-row{ display:flex; justify-content:space-between; padding:6px 0; font-size:13.5px; color:var(--ink-soft); }
+  .summary-row.total{
+    border-top:2px solid var(--brown); margin-top:6px; padding-top:10px;
+    font-size:18px; font-weight:700; color:var(--brown); font-variant-numeric:tabular-nums;
+  }
+  .summary-row input{ width:90px; text-align:right; padding:4px 6px; }
+
+  .actions-row{ display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+  /* ---------- Item master / history lists ---------- */
+  .list-card{ padding:0; overflow:hidden; }
+  .list-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 20px; border-bottom:1px solid var(--paper-line);
+  }
+  .list-row:last-child{ border-bottom:none; }
+  .list-row:hover{ background:#FBF8F0; }
+  .list-main{ font-weight:600; color:var(--ink); }
+  .list-sub{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .list-right{ display:flex; align-items:center; gap:14px; }
+  .pill{
+    font-size:11.5px; padding:3px 9px; border-radius:20px; background:#EFE7D2; color:var(--gold-deep); font-weight:600;
+  }
+  .empty-state{ padding:50px 20px; text-align:center; color:var(--ink-soft); }
+  .empty-state .serif{ font-size:18px; color:var(--brown); margin-bottom:6px; }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:10px; flex-wrap:wrap; }
+  .search{ flex:1; max-width:320px; }
+
+  /* ---------- Stock ---------- */
+  .stock-pill{ font-size:11.5px; padding:3px 9px; border-radius:20px; background:#E7EFE9; color:var(--green-soft); font-weight:600; white-space:nowrap; }
+  .stock-pill.low{ background:#F7E3DD; color:var(--red); }
+  .section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; margin:26px 0 10px; }
+  .section-label:first-child{ margin-top:0; }
+  .movement-row{ display:flex; justify-content:space-between; padding:10px 20px; border-bottom:1px solid var(--paper-line); font-size:13px; }
+  .movement-row:last-child{ border-bottom:none; }
+  .movement-left{ display:flex; flex-direction:column; }
+  .movement-note{ font-size:12px; color:var(--ink-soft); margin-top:1px; }
+  .movement-qty{ font-variant-numeric:tabular-nums; font-weight:600; }
+  .movement-qty.pos{ color:var(--green-soft); }
+  .movement-qty.neg{ color:var(--red); }
+  .stock-hint{ font-size:11.5px; color:var(--ink-soft); margin-top:4px; }
+  .stock-hint.low{ color:var(--red); font-weight:600; }
+
+  /* ---------- Invoice / print ---------- */
+  .invoice-wrap{ display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+  .invoice{
+    background:#fff; border:1px solid var(--paper-line); border-radius:6px; padding:36px 40px;
+    width:640px; max-width:100%;
+  }
+  .inv-head{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--brown); padding-bottom:16px; margin-bottom:18px; }
+  .inv-brand{ font-family:'Fraunces',serif; font-size:22px; font-weight:600; color:var(--brown); }
+  .inv-meta{ text-align:right; font-size:12.5px; color:var(--ink-soft); line-height:1.6; }
+  .inv-meta b{ color:var(--ink); }
+  .inv-parties{ display:flex; justify-content:space-between; margin-bottom:20px; font-size:13px; }
+  .inv-parties .label{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:3px; }
+  table.inv-table{ width:100%; border-collapse:collapse; margin-bottom:6px; }
+  table.inv-table th{ text-align:left; font-size:11px; text-transform:uppercase; color:var(--ink-soft); border-bottom:2px solid var(--brown); padding:6px 4px; }
+  table.inv-table td{ padding:8px 4px; border-bottom:1px solid var(--paper-line); font-size:13.5px; }
+  table.inv-table td.num, table.inv-table th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  .inv-summary{ margin-left:auto; width:230px; margin-top:8px; }
+  .inv-summary .row{ display:flex; justify-content:space-between; padding:4px 0; font-size:13px; color:var(--ink-soft); }
+  .inv-summary .row.total{ border-top:2px solid var(--brown); margin-top:6px; padding-top:8px; font-size:17px; font-weight:700; color:var(--brown); }
+  .inv-foot{ margin-top:26px; padding-top:14px; border-top:1px dashed var(--paper-line); font-size:11.5px; color:var(--ink-soft); text-align:center; }
+  .side-panel{ width:280px; display:flex; flex-direction:column; gap:14px; }
+  .side-panel .card h3{ font-size:14px; margin:0 0 4px; color:var(--brown); }
+  .side-panel .card p{ font-size:12.5px; color:var(--ink-soft); margin:0 0 12px; line-height:1.5; }
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--brown); color:#F4E7C8; padding:10px 20px; border-radius:6px; font-size:13px;
+    box-shadow:0 6px 18px rgba(0,0,0,.18); opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+
+  @media print{
+    .sidebar, .page-head, .toolbar, .actions-row, .side-panel, .toast{ display:none !important; }
+    main{ padding:0; max-width:none; }
+    .invoice{ border:none; padding:0; width:100%; }
+    body{ background:#fff; }
+  }
+
+  @media (max-width:760px){
+    .app{ flex-direction:column; }
+    .sidebar{ width:100%; flex-direction:row; align-items:center; padding:14px 16px; gap:14px; }
+    .brand-sub{ display:none; }
+    nav{ flex-direction:row; overflow-x:auto; }
+    .sidebar-foot{ display:none; }
+    main{ padding:20px; }
+    .grid-2, .grid-3{ grid-template-columns:1fr; }
+    .invoice{ padding:22px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Anaaj Khata</div>
+      <div class="brand-sub">Grain trade billing register</div>
+    </div>
+    <nav id="nav">
+      <button class="nav-btn active" data-view="bill"><span class="nav-dot"></span>New bill</button>
+      <button class="nav-btn" data-view="history"><span class="nav-dot"></span>Bill history</button>
+      <button class="nav-btn" data-view="customers"><span class="nav-dot"></span>Customers</button>
+      <button class="nav-btn" data-view="items"><span class="nav-dot"></span>Grain rates</button>
+      <button class="nav-btn" data-view="stock"><span class="nav-dot"></span>Stock</button>
+    </nav>
+    <div class="sidebar-foot">Rates are per kilogram.<br>Stock updates automatically when a bill is saved.</div>
+  </div>
+
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------------------------------------------------
+   Anaaj Khata — grain billing app
+   Storage: window.storage (personal, not shared)
+   Keys: 'items' (JSON array), 'bills-index' (JSON array),
+         'bill:<id>' (JSON bill)
+--------------------------------------------------------- */
+
+const UNIT_TO_KG = { kg: 1, quintal: 100, ton: 1000, gram: 0.001 };
+const UNIT_LABEL = { kg: 'kg', quintal: 'quintal', ton: 'ton', gram: 'gram' };
+
+let state = {
+  view: 'bill',
+  items: [],          // item master: {id, name, rate, stock, lowStock}
+  bills: [],           // index: {id, invoiceNo, date, customer, customerId, total}
+  currentBill: null,   // bill being viewed in history
+  stockLog: [],        // movement log: {id, date, itemId, itemName, type, qtyKg, note}
+  customers: [],        // {id, name, phone, address, createdAt}
+  historyFilter: null,  // customerId to filter bill history by, or null
+  loaded: false
+};
+
+function newDraft(){
+  return {
+    invoiceNo: null,
+    date: new Date().toISOString().slice(0,10),
+    customerId: '',
+    customerName: '',
+    customerPhone: '',
+    customerAddress: '',
+    rows: [ blankRow() ],
+    discountPercent: 0,
+    otherCharges: 0,
+    notes: ''
+  };
+}
+function blankRow(){ return { itemId:'', name:'', weight:'', unit:'kg', rate:'' }; }
+
+let draft = newDraft();
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ---------------- storage helpers ---------------- */
+async function loadAll(){
+  try{
+    const itemsRes = await window.storage.get('items');
+    state.items = itemsRes ? JSON.parse(itemsRes.value) : defaultItems();
+  }catch(e){ state.items = defaultItems(); }
+  try{
+    const idxRes = await window.storage.get('bills-index');
+    state.bills = idxRes ? JSON.parse(idxRes.value) : [];
+  }catch(e){ state.bills = []; }
+  try{
+    const logRes = await window.storage.get('stock-log');
+    state.stockLog = logRes ? JSON.parse(logRes.value) : [];
+  }catch(e){ state.stockLog = []; }
+  try{
+    const custRes = await window.storage.get('customers');
+    state.customers = custRes ? JSON.parse(custRes.value) : [];
+  }catch(e){ state.customers = []; }
+  if(!state.items.length){
+    state.items = defaultItems();
+    await saveItems();
+  }
+  // backfill stock fields for items saved before stock management existed
+  let needsSave = false;
+  state.items.forEach(i=>{
+    if(typeof i.stock !== 'number'){ i.stock = 0; needsSave = true; }
+    if(typeof i.lowStock !== 'number'){ i.lowStock = 50; needsSave = true; }
+  });
+  if(needsSave) await saveItems();
+  state.loaded = true;
+}
+function defaultItems(){
+  return [
+    { id:'i1', name:'Wheat (Gehu)', rate:24, stock:500, lowStock:100 },
+    { id:'i2', name:'Rice (Basmati)', rate:68, stock:300, lowStock:75 },
+    { id:'i3', name:'Chana (Gram)', rate:58, stock:200, lowStock:50 },
+    { id:'i4', name:'Bajra', rate:22, stock:250, lowStock:50 },
+    { id:'i5', name:'Toor Dal', rate:112, stock:150, lowStock:40 },
+    { id:'i6', name:'Mustard (Sarson)', rate:52, stock:100, lowStock:30 }
+  ];
+}
+async function saveItems(){
+  try{ await window.storage.set('items', JSON.stringify(state.items)); }
+  catch(e){ toast('Could not save grain list'); }
+}
+async function saveStockLog(){
+  if(state.stockLog.length > 300) state.stockLog = state.stockLog.slice(-300);
+  try{ await window.storage.set('stock-log', JSON.stringify(state.stockLog)); }
+  catch(e){ toast('Could not save stock history'); }
+}
+function logMovement(itemId, itemName, type, qtyKg, note){
+  state.stockLog.push({
+    id:'m'+Date.now()+Math.random().toString(36).slice(2,6),
+    date:new Date().toISOString(),
+    itemId, itemName, type, qtyKg, note:note||''
+  });
+}
+async function saveCustomers(){
+  try{ await window.storage.set('customers', JSON.stringify(state.customers)); }
+  catch(e){ toast('Could not save customer list'); }
+}
+function findOrCreateCustomer(name, phone, address){
+  name = (name||'').trim();
+  if(!name) return null;
+  phone = (phone||'').trim();
+  let existing = state.customers.find(c => c.name.toLowerCase() === name.toLowerCase() && (!phone || !c.phone || c.phone === phone));
+  if(existing){
+    if(phone && !existing.phone) existing.phone = phone;
+    if(address && !existing.address) existing.address = address;
+    return existing;
+  }
+  const c = { id:'c'+Date.now(), name, phone, address: address||'', createdAt: new Date().toISOString() };
+  state.customers.push(c);
+  return c;
+}
+async function saveBillsIndex(){
+  try{ await window.storage.set('bills-index', JSON.stringify(state.bills)); }
+  catch(e){ toast('Could not save bill history'); }
+}
+async function saveBill(bill){
+  try{ await window.storage.set('bill:'+bill.id, JSON.stringify(bill)); }
+  catch(e){ toast('Could not save bill'); }
+}
+async function getBill(id){
+  try{
+    const res = await window.storage.get('bill:'+id);
+    return res ? JSON.parse(res.value) : null;
+  }catch(e){ return null; }
+}
+async function deleteBillStorage(id){
+  try{ await window.storage.delete('bill:'+id); }catch(e){}
+}
+
+function nextInvoiceNo(){
+  const n = state.bills.length + 1;
+  const y = new Date().getFullYear();
+  return `AG-${y}-${String(n).padStart(4,'0')}`;
+}
+
+/* ---------------- calculations ---------------- */
+function rowWeightKg(row){
+  const w = parseFloat(row.weight);
+  if(isNaN(w)) return 0;
+  return w * (UNIT_TO_KG[row.unit] || 1);
+}
+function rowAmount(row){
+  const rate = parseFloat(row.rate);
+  if(isNaN(rate)) return 0;
+  return rowWeightKg(row) * rate;
+}
+function draftSubtotal(){
+  return draft.rows.reduce((s,r)=> s + rowAmount(r), 0);
+}
+function draftTotals(){
+  const subtotal = draftSubtotal();
+  const discPct = parseFloat(draft.discountPercent) || 0;
+  const discAmt = subtotal * (discPct/100);
+  const other = parseFloat(draft.otherCharges) || 0;
+  const raw = subtotal - discAmt + other;
+  const total = Math.round(raw);
+  const roundOff = total - raw;
+  return { subtotal, discAmt, other, total, roundOff };
+}
+function money(n){
+  if(isNaN(n)) n = 0;
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+/* ---------------- rendering ---------------- */
+function render(){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.view === state.view);
+  });
+  const main = document.getElementById('main');
+  if(!state.loaded){ main.innerHTML = '<div class="empty-state">Loading…</div>'; return; }
+  if(state.view === 'bill') main.innerHTML = renderBillView();
+  else if(state.view === 'items') main.innerHTML = renderItemsView();
+  else if(state.view === 'stock') main.innerHTML = renderStockView();
+  else if(state.view === 'customers') main.innerHTML = renderCustomersView();
+  else if(state.view === 'history') main.innerHTML = renderHistoryView();
+  else if(state.view === 'invoice') main.innerHTML = renderInvoiceView();
+  attachHandlers();
+}
+
+function renderBillView(){
+  const t = draftTotals();
+  const itemOptions = state.items.map(i=>`<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
+  const rowsHtml = draft.rows.map((r,idx)=>{
+    const amt = rowAmount(r);
+    const linkedItem = r.itemId && r.itemId !== '__custom' ? state.items.find(i=>i.id===r.itemId) : null;
+    const stockHint = linkedItem ? `<div class="stock-hint ${linkedItem.stock <= linkedItem.lowStock ? 'low' : ''}">${linkedItem.stock.toLocaleString('en-IN')} kg in stock</div>` : '';
+    return `
+    <tr data-row="${idx}">
+      <td>
+        <select class="row-item">
+          <option value="">— choose grain —</option>
+          ${itemOptions}
+          <option value="__custom">Other / type manually</option>
+        </select>
+        ${r.itemId==='__custom' || (r.itemId==='' && r.name) ? `<input class="row-name" placeholder="Grain name" value="${escapeAttr(r.name)}" style="margin-top:5px;">` : ''}
+        ${stockHint}
+      </td>
+      <td style="width:90px;"><input class="row-weight num" type="number" min="0" step="0.001" placeholder="0" value="${r.weight}"></td>
+      <td style="width:100px;">
+        <select class="row-unit">
+          <option value="kg" ${r.unit==='kg'?'selected':''}>kg</option>
+          <option value="quintal" ${r.unit==='quintal'?'selected':''}>quintal</option>
+          <option value="ton" ${r.unit==='ton'?'selected':''}>ton</option>
+          <option value="gram" ${r.unit==='gram'?'selected':''}>gram</option>
+        </select>
+      </td>
+      <td style="width:100px;"><input class="row-rate num" type="number" min="0" step="0.01" placeholder="0.00" value="${r.rate}"></td>
+      <td class="amt-cell" style="width:110px;">${money(amt)}</td>
+      <td style="width:30px;"><button class="row-x" data-remove="${idx}" title="Remove row">×</button></td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1>New bill</h1>
+      <div class="muted">Weigh it, rate it, bill it — amounts are calculated from weight × rate automatically.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid-3">
+      <div class="field">
+        <label>Customer</label>
+        <select id="f-customer-pick">
+          <option value="">+ New customer</option>
+          ${state.customers.map(c=>`<option value="${c.id}" ${draft.customerId===c.id?'selected':''}>${escapeHtml(c.name)}${c.phone ? ' — '+escapeHtml(c.phone) : ''}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Name</label>
+        <input id="f-customer" placeholder="e.g. Ramesh Traders" value="${escapeAttr(draft.customerName)}">
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input id="f-phone" placeholder="10-digit number" value="${escapeAttr(draft.customerPhone)}">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field" style="margin-bottom:6px;">
+        <label>Address (optional)</label>
+        <input id="f-address" placeholder="Village / mandi / shop address" value="${escapeAttr(draft.customerAddress)}">
+      </div>
+      <div class="field">
+        <label>Bill date</label>
+        <input id="f-date" type="date" value="${draft.date}">
+      </div>
+    </div>
+
+    <table class="items-table" style="margin-top:16px;">
+      <thead>
+        <tr>
+          <th style="width:38%;">Grain</th>
+          <th>Weight</th>
+          <th>Unit</th>
+          <th>Rate / kg</th>
+          <th style="text-align:right;">Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows-body">${rowsHtml}</tbody>
+    </table>
+    <button class="btn secondary small" id="add-row" style="margin-top:10px;">+ Add grain</button>
+
+    <div class="summary">
+      <div class="summary-box">
+        <div class="summary-row"><span>Subtotal</span><span>${money(t.subtotal)}</span></div>
+        <div class="summary-row">
+          <span>Discount %</span>
+          <input id="f-discount" type="number" min="0" step="0.1" value="${draft.discountPercent}">
+        </div>
+        <div class="summary-row">
+          <span>Loading / other charges</span>
+          <input id="f-other" type="number" min="0" step="1" value="${draft.otherCharges}">
+        </div>
+        <div class="summary-row"><span>Round off</span><span>${t.roundOff>=0?'+':''}${t.roundOff.toFixed(2)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>${money(t.total)}</span></div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:6px;">
+      <label>Notes (optional)</label>
+      <input id="f-notes" placeholder="e.g. Payment due in 7 days" value="${escapeAttr(draft.notes)}">
+    </div>
+
+    <div class="actions-row">
+      <button class="btn secondary" id="clear-draft">Clear</button>
+      <button class="btn" id="save-bill">Save &amp; generate invoice</button>
+    </div>
+  </div>`;
+}
+
+function renderItemsView(){
+  const rows = state.items.length ? state.items.map(i => `
+    <div class="list-row" data-id="${i.id}">
+      <div>
+        <div class="list-main">${escapeHtml(i.name)}</div>
+        <div class="list-sub">₹${Number(i.rate).toFixed(2)} per kg · ${i.stock.toLocaleString('en-IN')} kg in stock</div>
+      </div>
+      <div class="list-right">
+        <button class="btn secondary small edit-item" data-id="${i.id}">Edit</button>
+        <button class="btn danger small del-item" data-id="${i.id}">Remove</button>
+      </div>
+    </div>`).join('') : `<div class="empty-state"><div class="serif">No grains yet</div>Add your first grain and its rate below.</div>`;
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1>Grain rates</h1>
+      <div class="muted">Standard rates per kilogram — shown automatically when billing. Manage quantities on the Stock page.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="grid-3">
+      <div class="field"><label>Grain name</label><input id="ni-name" placeholder="e.g. Moong Dal"></div>
+      <div class="field"><label>Rate per kg (₹)</label><input id="ni-rate" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Opening stock (kg)</label><input id="ni-stock" type="number" min="0" step="0.1" placeholder="0"></div>
+    </div>
+    <button class="btn" id="add-item">Add grain</button>
+  </div>
+
+  <div class="card list-card">${rows}</div>`;
+}
+
+function renderStockView(){
+  const lowCount = state.items.filter(i=>i.stock <= i.lowStock).length;
+  const itemOptions = state.items.map(i=>`<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
+
+  const rows = state.items.length ? state.items.map(i => {
+    const low = i.stock <= i.lowStock;
+    return `
+    <div class="list-row">
+      <div>
+        <div class="list-main">${escapeHtml(i.name)}</div>
+        <div class="list-sub">Alert below ${i.lowStock.toLocaleString('en-IN')} kg</div>
+      </div>
+      <div class="list-right">
+        <span class="stock-pill ${low?'low':''}">${i.stock.toLocaleString('en-IN')} kg</span>
+        <button class="btn secondary small adjust-stock" data-id="${i.id}">Adjust</button>
+        <button class="btn secondary small edit-alert" data-id="${i.id}">Set alert</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty-state"><div class="serif">No grains yet</div>Add grains on the Grain rates page first.</div>`;
+
+  const recent = [...state.stockLog].reverse().slice(0, 12);
+  const movementsHtml = recent.length ? recent.map(m => `
+    <div class="movement-row">
+      <div class="movement-left">
+        <span>${escapeHtml(m.itemName)} · ${movementLabel(m.type)}</span>
+        ${m.note ? `<span class="movement-note">${escapeHtml(m.note)}</span>` : ''}
+      </div>
+      <div style="text-align:right;">
+        <div class="movement-qty ${m.qtyKg >= 0 ? 'pos':'neg'}">${m.qtyKg>=0?'+':''}${m.qtyKg.toLocaleString('en-IN', {maximumFractionDigits:2})} kg</div>
+        <div class="movement-note">${formatDateTime(m.date)}</div>
+      </div>
+    </div>`).join('') : `<div class="empty-state">No stock movements recorded yet.</div>`;
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1>Stock</h1>
+      <div class="muted">${state.items.length} grain${state.items.length===1?'':'s'} tracked${lowCount ? ` · ${lowCount} below alert level` : ''}</div>
+    </div>
+  </div>
+
+  <div class="section-label">Add stock (purchase / restock)</div>
+  <div class="card" style="margin-bottom:22px;">
+    <div class="grid-3">
+      <div class="field">
+        <label>Grain</label>
+        <select id="rs-item">${itemOptions || '<option value="">No grains yet</option>'}</select>
+      </div>
+      <div class="field"><label>Quantity (kg)</label><input id="rs-qty" type="number" min="0" step="0.1" placeholder="0"></div>
+      <div class="field"><label>Note (optional)</label><input id="rs-note" placeholder="e.g. Supplier / invoice ref"></div>
+    </div>
+    <button class="btn" id="add-stock" ${state.items.length?'':'disabled'}>Add to stock</button>
+  </div>
+
+  <div class="section-label">Current stock</div>
+  <div class="card list-card" style="margin-bottom:22px;">${rows}</div>
+
+  <div class="section-label">Recent movements</div>
+  <div class="card list-card">${movementsHtml}</div>`;
+}
+function movementLabel(type){
+  if(type==='purchase') return 'Stock added';
+  if(type==='sale') return 'Sold in bill';
+  if(type==='adjustment') return 'Manual adjustment';
+  return type;
+}
+function formatDateTime(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return d.toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+function renderHistoryView(){
+  const filterCustomer = state.historyFilter ? state.customers.find(c=>c.id===state.historyFilter) : null;
+  const filteredBills = filterCustomer ? state.bills.filter(b=>b.customerId===filterCustomer.id) : state.bills;
+  const rows = filteredBills.length ? [...filteredBills].reverse().map(b => `
+    <div class="list-row" data-open="${b.id}">
+      <div>
+        <div class="list-main">${escapeHtml(b.customer || 'Walk-in customer')}</div>
+        <div class="list-sub">${b.invoiceNo} · ${formatDate(b.date)}</div>
+      </div>
+      <div class="list-right">
+        <span class="pill">${money(b.total)}</span>
+        <button class="btn secondary small" data-open="${b.id}">View</button>
+        <button class="btn danger small" data-del="${b.id}">Delete</button>
+      </div>
+    </div>`).join('') : `<div class="empty-state"><div class="serif">No bills ${filterCustomer ? 'for this customer' : 'saved'} yet</div>${filterCustomer ? '' : 'Bills you save will appear here for quick reprinting.'}</div>`;
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1>Bill history</h1>
+      <div class="muted">${filterCustomer ? `Showing bills for ${escapeHtml(filterCustomer.name)}` : `${state.bills.length} bill${state.bills.length===1?'':'s'} saved`}</div>
+    </div>
+    ${filterCustomer ? `<button class="btn secondary small" id="clear-filter">Show all bills</button>` : ''}
+  </div>
+  <div class="card list-card">${rows}</div>`;
+}
+
+function renderCustomersView(){
+  const totals = {};
+  state.bills.forEach(b=>{
+    if(!b.customerId) return;
+    if(!totals[b.customerId]) totals[b.customerId] = { count:0, sum:0 };
+    totals[b.customerId].count++;
+    totals[b.customerId].sum += b.total;
+  });
+  const rows = state.customers.length ? [...state.customers].reverse().map(c => {
+    const t = totals[c.id] || { count:0, sum:0 };
+    return `
+    <div class="list-row">
+      <div>
+        <div class="list-main">${escapeHtml(c.name)}</div>
+        <div class="list-sub">${c.phone ? escapeHtml(c.phone) : 'No phone on file'}${c.address ? ' · '+escapeHtml(c.address) : ''}</div>
+      </div>
+      <div class="list-right">
+        <span class="pill">${t.count} bill${t.count===1?'':'s'} · ${money(t.sum)}</span>
+        <button class="btn secondary small" data-view-bills="${c.id}">Bills</button>
+        <button class="btn secondary small edit-customer" data-id="${c.id}">Edit</button>
+        <button class="btn danger small del-customer" data-id="${c.id}">Remove</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty-state"><div class="serif">No customers yet</div>Add one below, or they'll be added automatically the next time you save a bill.</div>`;
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1>Customers</h1>
+      <div class="muted">${state.customers.length} customer${state.customers.length===1?'':'s'} on file</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="grid-3">
+      <div class="field"><label>Name</label><input id="nc-name" placeholder="e.g. Ramesh Traders"></div>
+      <div class="field"><label>Phone</label><input id="nc-phone" placeholder="10-digit number"></div>
+      <div class="field"><label>Address</label><input id="nc-address" placeholder="Village / mandi / shop address"></div>
+    </div>
+    <button class="btn" id="add-customer">Add customer</button>
+  </div>
+
+  <div class="card list-card">${rows}</div>`;
+}
+
+function renderInvoiceView(){
+  const b = state.currentBill;
+  if(!b) return `<div class="empty-state">Bill not found.</div>`;
+  const rowsHtml = b.rows.map(r => `
+    <tr>
+      <td>${escapeHtml(r.name)}</td>
+      <td class="num">${r.weight} ${UNIT_LABEL[r.unit]}</td>
+      <td class="num">₹${Number(r.rate).toFixed(2)}</td>
+      <td class="num">${money(rowAmountStatic(r))}</td>
+    </tr>`).join('');
+  const t = billTotalsStatic(b);
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1>Invoice ${b.invoiceNo}</h1>
+      <div class="muted">Saved ${formatDate(b.date)}</div>
+    </div>
+  </div>
+  <div class="invoice-wrap">
+    <div class="invoice" id="printable">
+      <div class="inv-head">
+        <div class="inv-brand">Anaaj Khata</div>
+        <div class="inv-meta">
+          <div><b>${b.invoiceNo}</b></div>
+          <div>${formatDate(b.date)}</div>
+        </div>
+      </div>
+      <div class="inv-parties">
+        <div>
+          <div class="label">Billed to</div>
+          <div><b>${escapeHtml(b.customerName || 'Walk-in customer')}</b></div>
+          ${b.customerPhone ? `<div>${escapeHtml(b.customerPhone)}</div>` : ''}
+          ${b.customerAddress ? `<div>${escapeHtml(b.customerAddress)}</div>` : ''}
+        </div>
+      </div>
+      <table class="inv-table">
+        <thead><tr><th>Grain</th><th class="num">Weight</th><th class="num">Rate/kg</th><th class="num">Amount</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div class="inv-summary">
+        <div class="row"><span>Subtotal</span><span>${money(t.subtotal)}</span></div>
+        ${t.discAmt ? `<div class="row"><span>Discount (${b.discountPercent}%)</span><span>-${money(t.discAmt)}</span></div>` : ''}
+        ${t.other ? `<div class="row"><span>Loading / other</span><span>${money(t.other)}</span></div>` : ''}
+        <div class="row"><span>Round off</span><span>${t.roundOff>=0?'+':''}${t.roundOff.toFixed(2)}</span></div>
+        <div class="row total"><span>Total</span><span>${money(t.total)}</span></div>
+      </div>
+      ${b.notes ? `<div class="inv-foot" style="text-align:left; border-top:none; margin-top:14px; padding-top:0;">Note: ${escapeHtml(b.notes)}</div>` : ''}
+      <div class="inv-foot">Thank you for your business.</div>
+    </div>
+    <div class="side-panel">
+      <div class="card">
+        <h3>Actions</h3>
+        <p>Print this invoice or hand a copy to your customer.</p>
+        <button class="btn" id="print-invoice" style="width:100%; margin-bottom:8px;">Print invoice</button>
+        <button class="btn secondary" id="back-history" style="width:100%;">Back to history</button>
+      </div>
+    </div>
+  </div>`;
+}
+function rowAmountStatic(r){
+  const w = parseFloat(r.weight) || 0;
+  const rate = parseFloat(r.rate) || 0;
+  return w * (UNIT_TO_KG[r.unit]||1) * rate;
+}
+function billTotalsStatic(b){
+  const subtotal = b.rows.reduce((s,r)=> s + rowAmountStatic(r), 0);
+  const discPct = parseFloat(b.discountPercent) || 0;
+  const discAmt = subtotal * (discPct/100);
+  const other = parseFloat(b.otherCharges) || 0;
+  const raw = subtotal - discAmt + other;
+  const total = Math.round(raw);
+  const roundOff = total - raw;
+  return { subtotal, discAmt, other, total, roundOff };
+}
+
+function formatDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---------------- event handlers ---------------- */
+function attachHandlers(){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.onclick = () => {
+      state.view = b.dataset.view;
+      if(b.dataset.view === 'history') state.historyFilter = null;
+      render();
+    };
+  });
+
+  if(state.view === 'bill'){
+    document.getElementById('f-customer-pick').onchange = e => {
+      const id = e.target.value;
+      draft.customerId = id;
+      if(id){
+        const c = state.customers.find(c=>c.id===id);
+        if(c){ draft.customerName = c.name; draft.customerPhone = c.phone; draft.customerAddress = c.address; }
+      }
+      render();
+    };
+    document.getElementById('f-customer').oninput = e => { draft.customerName = e.target.value; draft.customerId = ''; };
+    document.getElementById('f-phone').oninput = e => { draft.customerPhone = e.target.value; draft.customerId = ''; };
+    document.getElementById('f-address').oninput = e => { draft.customerAddress = e.target.value; draft.customerId = ''; };
+    document.getElementById('f-date').oninput = e => draft.date = e.target.value;
+    document.getElementById('f-discount').oninput = e => { draft.discountPercent = e.target.value; refreshSummary(); };
+    document.getElementById('f-other').oninput = e => { draft.otherCharges = e.target.value; refreshSummary(); };
+    document.getElementById('f-notes').oninput = e => draft.notes = e.target.value;
+
+    document.getElementById('add-row').onclick = () => { draft.rows.push(blankRow()); render(); };
+    document.getElementById('clear-draft').onclick = () => {
+      if(confirm('Clear this bill and start over?')){ draft = newDraft(); render(); }
+    };
+    document.getElementById('save-bill').onclick = handleSaveBill;
+
+    document.querySelectorAll('[data-remove]').forEach(btn=>{
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.remove);
+        if(draft.rows.length > 1) draft.rows.splice(idx,1);
+        else draft.rows[0] = blankRow();
+        render();
+      };
+    });
+
+    document.querySelectorAll('#rows-body tr').forEach(tr=>{
+      const idx = parseInt(tr.dataset.row);
+      const row = draft.rows[idx];
+      const sel = tr.querySelector('.row-item');
+      sel.value = row.itemId || '';
+      sel.onchange = () => {
+        const val = sel.value;
+        row.itemId = val;
+        if(val === '__custom'){ row.name = row.name || ''; }
+        else if(val){
+          const found = state.items.find(i=>i.id===val);
+          if(found){ row.name = found.name; row.rate = found.rate; }
+        } else { row.name = ''; }
+        render();
+      };
+      const nameInput = tr.querySelector('.row-name');
+      if(nameInput) nameInput.oninput = e => { row.name = e.target.value; };
+      tr.querySelector('.row-weight').oninput = e => { row.weight = e.target.value; refreshRowAmount(tr, row); };
+      tr.querySelector('.row-unit').onchange = e => { row.unit = e.target.value; refreshRowAmount(tr, row); };
+      tr.querySelector('.row-rate').oninput = e => { row.rate = e.target.value; refreshRowAmount(tr, row); };
+    });
+  }
+
+  if(state.view === 'items'){
+    document.getElementById('add-item').onclick = async () => {
+      const nameEl = document.getElementById('ni-name');
+      const rateEl = document.getElementById('ni-rate');
+      const stockEl = document.getElementById('ni-stock');
+      const name = nameEl.value.trim();
+      const rate = parseFloat(rateEl.value);
+      const stock = parseFloat(stockEl.value) || 0;
+      if(!name){ toast('Enter a grain name'); return; }
+      if(isNaN(rate) || rate < 0){ toast('Enter a valid rate'); return; }
+      const id = 'i'+Date.now();
+      state.items.push({ id, name, rate, stock, lowStock: 50 });
+      await saveItems();
+      if(stock > 0){
+        logMovement(id, name, 'purchase', stock, 'Opening stock');
+        await saveStockLog();
+      }
+      toast('Grain added');
+      render();
+    };
+    document.querySelectorAll('.del-item').forEach(btn=>{
+      btn.onclick = async () => {
+        if(!confirm('Remove this grain from your rate list?')) return;
+        state.items = state.items.filter(i=>i.id!==btn.dataset.id);
+        await saveItems();
+        render();
+      };
+    });
+    document.querySelectorAll('.edit-item').forEach(btn=>{
+      btn.onclick = async () => {
+        const item = state.items.find(i=>i.id===btn.dataset.id);
+        if(!item) return;
+        const newRate = prompt(`New rate per kg for ${item.name}:`, item.rate);
+        if(newRate === null) return;
+        const val = parseFloat(newRate);
+        if(isNaN(val) || val < 0){ toast('Invalid rate'); return; }
+        item.rate = val;
+        await saveItems();
+        render();
+      };
+    });
+  }
+
+  if(state.view === 'stock'){
+    const addBtn = document.getElementById('add-stock');
+    if(addBtn){
+      addBtn.onclick = async () => {
+        const itemEl = document.getElementById('rs-item');
+        const qtyEl = document.getElementById('rs-qty');
+        const noteEl = document.getElementById('rs-note');
+        const item = state.items.find(i=>i.id === itemEl.value);
+        const qty = parseFloat(qtyEl.value);
+        if(!item){ toast('Choose a grain'); return; }
+        if(isNaN(qty) || qty <= 0){ toast('Enter a quantity above 0'); return; }
+        item.stock += qty;
+        await saveItems();
+        logMovement(item.id, item.name, 'purchase', qty, noteEl.value.trim());
+        await saveStockLog();
+        toast(`${qty} kg added to ${item.name}`);
+        render();
+      };
+    }
+    document.querySelectorAll('.adjust-stock').forEach(btn=>{
+      btn.onclick = async () => {
+        const item = state.items.find(i=>i.id===btn.dataset.id);
+        if(!item) return;
+        const input = prompt(`Adjust stock for ${item.name} (kg).\nUse a positive number to add, negative to reduce (e.g. -5 for spillage/wastage).\nCurrent stock: ${item.stock} kg`, '0');
+        if(input === null) return;
+        const delta = parseFloat(input);
+        if(isNaN(delta) || delta === 0){ toast('Enter a non-zero number'); return; }
+        const reason = prompt('Reason (optional):', delta < 0 ? 'Wastage' : 'Correction') || '';
+        item.stock = Math.max(0, item.stock + delta);
+        await saveItems();
+        logMovement(item.id, item.name, 'adjustment', delta, reason);
+        await saveStockLog();
+        toast('Stock updated');
+        render();
+      };
+    });
+    document.querySelectorAll('.edit-alert').forEach(btn=>{
+      btn.onclick = async () => {
+        const item = state.items.find(i=>i.id===btn.dataset.id);
+        if(!item) return;
+        const input = prompt(`Low stock alert level for ${item.name} (kg):`, item.lowStock);
+        if(input === null) return;
+        const val = parseFloat(input);
+        if(isNaN(val) || val < 0){ toast('Invalid value'); return; }
+        item.lowStock = val;
+        await saveItems();
+        render();
+      };
+    });
+  }
+
+  if(state.view === 'history'){
+    document.querySelectorAll('[data-open]').forEach(el=>{
+      el.onclick = async (e) => {
+        if(e.target.closest('[data-del]')) return;
+        const id = el.dataset.open;
+        const bill = await getBill(id);
+        if(!bill){ toast('Bill not found'); return; }
+        state.currentBill = bill;
+        state.view = 'invoice';
+        render();
+      };
+    });
+    document.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.onclick = async (e) => {
+        e.stopPropagation();
+        if(!confirm('Delete this bill permanently?')) return;
+        const id = btn.dataset.del;
+        state.bills = state.bills.filter(b=>b.id!==id);
+        await saveBillsIndex();
+        await deleteBillStorage(id);
+        render();
+      };
+    });
+    const clearFilterBtn = document.getElementById('clear-filter');
+    if(clearFilterBtn) clearFilterBtn.onclick = () => { state.historyFilter = null; render(); };
+  }
+
+  if(state.view === 'customers'){
+    document.getElementById('add-customer').onclick = async () => {
+      const nameEl = document.getElementById('nc-name');
+      const phoneEl = document.getElementById('nc-phone');
+      const addrEl = document.getElementById('nc-address');
+      const name = nameEl.value.trim();
+      if(!name){ toast('Enter a customer name'); return; }
+      const c = findOrCreateCustomer(name, phoneEl.value.trim(), addrEl.value.trim());
+      await saveCustomers();
+      toast('Customer added');
+      render();
+    };
+    document.querySelectorAll('[data-view-bills]').forEach(btn=>{
+      btn.onclick = () => { state.historyFilter = btn.dataset.viewBills; state.view = 'history'; render(); };
+    });
+    document.querySelectorAll('.edit-customer').forEach(btn=>{
+      btn.onclick = async () => {
+        const c = state.customers.find(x=>x.id===btn.dataset.id);
+        if(!c) return;
+        const name = prompt('Customer name:', c.name);
+        if(name === null) return;
+        const phone = prompt('Phone:', c.phone || '');
+        if(phone === null) return;
+        const address = prompt('Address:', c.address || '');
+        if(address === null) return;
+        c.name = name.trim() || c.name;
+        c.phone = phone.trim();
+        c.address = address.trim();
+        await saveCustomers();
+        render();
+      };
+    });
+    document.querySelectorAll('.del-customer').forEach(btn=>{
+      btn.onclick = async () => {
+        if(!confirm('Remove this customer? Past bills will keep their saved details.')) return;
+        state.customers = state.customers.filter(c=>c.id!==btn.dataset.id);
+        await saveCustomers();
+        render();
+      };
+    });
+  }
+
+  if(state.view === 'invoice'){
+    document.getElementById('print-invoice').onclick = () => window.print();
+    document.getElementById('back-history').onclick = () => { state.view = 'history'; render(); };
+  }
+}
+
+function refreshRowAmount(tr, row){
+  const cell = tr.querySelector('.amt-cell');
+  cell.textContent = money(rowAmount(row));
+  refreshSummary();
+}
+function refreshSummary(){
+  const t = draftTotals();
+  const box = document.querySelector('.summary-box');
+  if(!box) return;
+  const rowsEls = box.querySelectorAll('.summary-row');
+  rowsEls[0].lastElementChild.textContent = money(t.subtotal);
+  rowsEls[3].lastElementChild.textContent = (t.roundOff>=0?'+':'') + t.roundOff.toFixed(2);
+  rowsEls[4].lastElementChild.textContent = money(t.total);
+}
+
+async function handleSaveBill(){
+  const validRows = draft.rows.filter(r => (r.name && r.name.trim()) && parseFloat(r.weight) > 0 && parseFloat(r.rate) >= 0);
+  if(!validRows.length){ toast('Add at least one grain with weight and rate'); return; }
+  const t = draftTotals();
+  const id = 'b' + Date.now();
+  const invoiceNo = nextInvoiceNo();
+
+  let customer = draft.customerId ? state.customers.find(c=>c.id===draft.customerId) : null;
+  let customersChanged = false;
+  if(!customer && draft.customerName.trim()){
+    customer = findOrCreateCustomer(draft.customerName, draft.customerPhone, draft.customerAddress);
+    customersChanged = true;
+  } else if(customer){
+    if(draft.customerPhone && customer.phone !== draft.customerPhone){ customer.phone = draft.customerPhone; customersChanged = true; }
+    if(draft.customerAddress && customer.address !== draft.customerAddress){ customer.address = draft.customerAddress; customersChanged = true; }
+  }
+  if(customersChanged) await saveCustomers();
+
+  const bill = {
+    id, invoiceNo,
+    date: draft.date,
+    customerId: customer ? customer.id : '',
+    customerName: draft.customerName,
+    customerPhone: draft.customerPhone,
+    customerAddress: draft.customerAddress,
+    rows: validRows,
+    discountPercent: draft.discountPercent || 0,
+    otherCharges: draft.otherCharges || 0,
+    notes: draft.notes,
+    total: t.total
+  };
+  await saveBill(bill);
+  state.bills.push({ id, invoiceNo, date: bill.date, customer: bill.customerName, customerId: bill.customerId, total: t.total });
+  await saveBillsIndex();
+
+  // deduct stock for rows linked to a real grain in the item master
+  let itemsChanged = false;
+  let lowStockWarnings = [];
+  validRows.forEach(r=>{
+    if(!r.itemId || r.itemId === '__custom') return;
+    const item = state.items.find(i=>i.id === r.itemId);
+    if(!item) return;
+    const kg = rowWeightKg(r);
+    item.stock = item.stock - kg;
+    itemsChanged = true;
+    logMovement(item.id, item.name, 'sale', -kg, `Bill ${invoiceNo}`);
+    if(item.stock <= item.lowStock) lowStockWarnings.push(item.name);
+  });
+  if(itemsChanged){ await saveItems(); await saveStockLog(); }
+
+  toast(lowStockWarnings.length ? `Bill saved · low stock: ${lowStockWarnings.join(', ')}` : 'Bill saved');
+  draft = newDraft();
+  state.currentBill = bill;
+  state.view = 'invoice';
+  render();
+}
+
+/* ---------------- init ---------------- */
+(async function init(){
+  render();
+  await loadAll();
+  render();
+})();
+</script>
+</body>
+</html>
